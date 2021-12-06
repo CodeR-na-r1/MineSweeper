@@ -41,3 +41,9 @@ body
   top: 13px;
   left: 13px;
 }
+
+.markered
+{
+  border: 2px solid #04BEEE80;
+  border-radius: 2px;
+}
