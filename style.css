@@ -1,0 +1,35 @@
+html, body
+{
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body
+{
+  background: #fff;
+  font-family: Roboto, sans-serif;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.field-container
+{
+  padding: 0;
+  width: 800px;
+  margin: 80px auto;
+}
+
+.cell
+{
+  display: inline-block;
+  padding: 0px;
+  width: 40px;
+  height: 40px;
+  text-align: center;
+  vertical-align: middle;
+  background: #BBBBBB;
+  margin: 0 8px 8px 0px;
+  border: 1px solid #707070;
+}
