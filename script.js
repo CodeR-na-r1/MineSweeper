@@ -35,7 +35,8 @@ function init_cells(event)
     document.getElementsByClassName("field-container")[0].removeEventListener('click', init_cells);
     let click_elem = event["path"][0];
     field[Number(click_elem.getAttribute('data-count'))].isBomb = false;
-    click_elem.innerHTML = show(click_elem);
+    let count = calc_bomb_around(click_elem);
+    show_bomb_around(click_elem, count);
     document.getElementsByClassName("field-container")[0].addEventListener('click', processing_move);
   }
 
@@ -51,7 +52,8 @@ function processing_move(event)
   {
     if (field[num_elem].isBomb == false)
     {
-      event_elem.innerHTML = show(event_elem);
+      let count = calc_bomb_around(event_elem);
+      show_bomb_around(event_elem, count);
     }
     else if (field[num_elem].isBomb == true)
     {
@@ -65,7 +67,7 @@ function processing_move(event)
   return;
 }
 
-function show(event_elem)
+function calc_bomb_around(event_elem)
 {
   let i = Number(event_elem.getAttribute('data-count'));
 
@@ -82,6 +84,16 @@ function show(event_elem)
   if ((i+1) % 12 != 0 && i + WIDTH + 1 > 0 && field[i + WIDTH + 1].isBomb) { ++count; }
 
   return count;
+}
+
+function show_bomb_around(event_elem, count)
+{
+  let span = document.createElement('span');
+  span.innerText = count;
+  span.classList.add('amount_bomb_around');
+  event_elem.appendChild(span);
+
+  return;
 }
 
 init_field();
