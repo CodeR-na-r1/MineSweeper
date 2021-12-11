@@ -27,17 +27,17 @@ function init_field()
   return;
 }
 
-/* Размеры поля */
+/* Инициализация поля */
 function init_cells(event)
 {
-  for (let i = 0; i < WIDTH * HEIGHT; i++) {  //
-    if (((Math.trunc(Math.random() * 100) % 3) & 1) && ((Math.trunc(Math.random() * 100) % 3) & 1))  //
-      field[i] = new Object( {'isBomb': true, 'user_marker': false} );  //
+  for (let i = 0; i < WIDTH * HEIGHT; i++) {  // Идем по полю
+    if (((Math.trunc(Math.random() * 100) % 3) & 1) && ((Math.trunc(Math.random() * 100) % 3) & 1))  // Некоторая вероятность
+      field[i] = new Object( {'isBomb': true, 'user_marker': false} );  // С меньшей вероятностью бомбу ставим
     else
-      field[i] = new Object( {'isBomb': false, 'user_marker': false} );  //
+      field[i] = new Object( {'isBomb': false, 'user_marker': false} );  // С большей вероятностью бомбу не ставим (около 8/9 %)
   }
 
-  if (event["path"][0].getAttribute('data-count') != null)  //
+  if (event["path"][0].getAttribute('data-count') != null)  // Если нажатие не на фон, а на ячейку
   {
     document.getElementsByClassName("field-container")[0].removeEventListener('click', init_cells);  // Убираем событие для 1 хода
     let click_elem = event["path"][0];   // Элемент, куда нажал пользователь
@@ -61,7 +61,7 @@ function init_cells(event)
 function processing_move(event)
 {
   let event_elem;   // Целевая ячейка
-  if (event && event['path'][0].getAttribute('data-count') != null)   // Если событие с мыши - берем по событию
+  if (event && event['path'][0].getAttribute('data-count') != null)   // Если событие с мыши - берем по событию, 2 условие проверяет, что клик не на фон, а именно на ячейку
   {
     event_elem = event['path'][0];
   }
@@ -75,17 +75,40 @@ function processing_move(event)
   {
     update_marker_cell(event_elem);   // Метим ячейку, куда нажал пользователь
 
+    if (amount_open_cells >= WIDTH * HEIGHT)   // Если все ячейки выделены, проверяем условие выигрыша
+    {
+      // Проверки, что все помеченные ячейки не являются бомбами
+      let flag = true;
+      for (let i = 0; i < WIDTH * HEIGHT; i++)  // Идем по полю
+      {
+          if (field[i].user_marker && field[i].isBomb == false)
+          {
+            flag = false;
+            break;
+          }
+      }
+      // Удаляем поле
+      if (flag)
+      {
+        let cell_contain = document.getElementsByClassName('field-container')[0];
+        while (cell_contain.childElementCount > 0)
+        {
+          cell_contain.removeChild(cell_contain.children[0]);
+        }
+      // Поздравление о выигрыше
+      cell_contain.style.height='286px';
+      cell_contain.style.width='800px';
+      cell_contain.style.backgroundImage = "url(data_pictures/completed.jpg)";
+      // Отключаем события на нажатия левой, правой кнопки мыши и клавиатуры соответсвенно
+      document.getElementsByClassName("field-container")[0].removeEventListener('click', processing_move);
+      document.getElementsByClassName("field-container")[0].removeEventListener('contextmenu', mark_a_cell);
+      document.removeEventListener('keydown', events_keyboard);
+      return;
+      }
+    }
+
     if (field[num_elem].user_marker == true)   // Если на ней метка (флажок), то не трогаем
      return;
-
-     if (amount_open_cells == WIDTH * HEIGHT)   // Если все ячейки выделены, проверяем условие выигрыша
-    {
-      // Проверки, что все помеченные ячейки не являються бомбами
-      // Поздравление о выигрыше
-      // Comming soon
-
-      //return;
-    }
 
     if (field[num_elem].isBomb == false)   // Если не бомба
     {
@@ -97,9 +120,9 @@ function processing_move(event)
     {
       console.log('bomb');   // Отладочный рудимент
       // Отключаем события на нажатия левой, правой кнопки мыши и клавиатуры соответсвенно
-      //document.getElementsByClassName("field-container")[0].removeEventListener('click', processing_move);
-      //document.getElementsByClassName("field-container")[0].removeEventListener('contextmenu', mark_a_cell);
-      //document.removeEventListener('keydown', events_keyboard);
+      document.getElementsByClassName("field-container")[0].removeEventListener('click', processing_move);
+      document.getElementsByClassName("field-container")[0].removeEventListener('contextmenu', mark_a_cell);
+      document.removeEventListener('keydown', events_keyboard);
       // Добавляем изображение бомбы
       event_elem.style.backgroundImage = 'url(data_pictures/bomb.svg)';
       event_elem.style.backgroundColor = 'red';
@@ -156,13 +179,15 @@ function mark_a_cell(event)
   if (cell.getAttribute('data-count') != null)   // Если событие точно на ячейку
   {
     if (event) event.preventDefault();   // Если это событие с мыши, то отключаем появление контекстного меню
-    if (field[Number(cell.getAttribute('data-count'))].user_marker)   // Если метка уже была
+    let marker = field[Number(cell.getAttribute('data-count'))].user_marker;
+    let now_cell_inner = cell.innerHTML;
+    if (marker)   // Если метка уже была
     {
       --amount_open_cells;  // Вычет ячейки из общего количества открытых (обработанных) ячеек
       field[Number(cell.getAttribute('data-count'))].user_marker = false;   // меняем флаг в свойтсвах ячейки
       cell.style.backgroundImage = "";   // Убираем флаг с фона ячейки
     }
-    else   // Если метки не было
+    else if (marker == false && now_cell_inner == "")   // Если метки не было
       {
         ++amount_open_cells;  // Добавление ячейки в общее количество открытых (обработанных) ячеек
         field[Number(cell.getAttribute('data-count'))].user_marker = true;   // меняем флаг в свойтсвах ячейки
